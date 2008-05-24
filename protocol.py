@@ -29,6 +29,7 @@ class ProtocolMessage:
     OP_TIMEOUT = 408 # Authorization timeout error
 
     PROTO_VERSION = 1.0 # Current protocol version
+    MAX_PACKET_SIZE = 64*1024
 
     FIELD_X_AXIS = "X-X-Axis"
     FIELD_Y_AXIS = "X-Y-Axis"

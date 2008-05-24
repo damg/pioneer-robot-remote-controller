@@ -27,7 +27,7 @@ from protocol import *
 class Server(asyncore.dispatcher):
     """ Accepts commands via an UDP socket """
     EXCLUSIVE_ACCESS_TIMEOUT = 30
-    MAX_PACKET_SIZE = 64*1024
+
     def __init__(self, port=45454):
         asyncore.dispatcher.__init__(self)
         
@@ -92,6 +92,8 @@ class Server(asyncore.dispatcher):
                     self.send_video = True
                 else:
                     self.send_video = False
+                    
+                print "Authorized client", address[0], address[1]
 
     def handle_command(self, message): #handle a non-handshake message
         if message.code == ProtocolMessage.OP_BYE:
@@ -115,7 +117,7 @@ class Server(asyncore.dispatcher):
             self.last_access_time = time.time()
 
     def handle_read(self):
-        message, address = self.recvfrom(Server.MAX_PACKET_SIZE)
+        message, address = self.recvfrom(ProtocolMessage.MAX_PACKET_SIZE)
         try:
             message = ProtocolMessageParser(message)
         except:

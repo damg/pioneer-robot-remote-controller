@@ -21,12 +21,16 @@ import sys
 import socket
 import asyncore
 import pygame
+import time
 
 class Client(asyncore.dispatcher):
-    MAX_PACKET_SIZE=64*1024
+    TICK_RATE=20 #milliseconds
     def __init__(self, address):
         self.address = address
         self.connected = False
+        self.last_send_timestamp = 0
+        self.current_control_state = (0, 0)
+        self.queue_control_state = (0, 0)
 
         asyncore.dispatcher.__init__(self)
         self.create_socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -37,7 +41,7 @@ class Client(asyncore.dispatcher):
         self.sendto(str(handshake), self.address)
 
     def handle_read(self):
-        message, address = self.recvfrom(Client.MAX_PACKET_SIZE)
+        message, address = self.recvfrom(ProtocolMessage.MAX_PACKET_SIZE)
         print message
 
     def handle_write(self):
