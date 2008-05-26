@@ -65,7 +65,7 @@ class ProtocolMessage:
         else:
             return k in self.fields
 
-    def __setitem(self, k, v):
+    def __setitem__(self, k, v):
         if k == "code":
             self.code = v
         elif k == "msgcode":
