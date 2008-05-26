@@ -123,6 +123,7 @@ class Server(asyncore.dispatcher):
         except:
             self.sendto(str(ProtocolMessage(ProtocolMessage.OP_BADREQ, \
                                                 "Bad request")), address)
+            return
         if address != self.controlling_address:
             self.handle_handshake(address, message)
         else:
