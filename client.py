@@ -24,13 +24,19 @@ import pygame
 import time
 
 class Client(asyncore.dispatcher):
-    TICK_RATE=20 #milliseconds
+    TICK_RATE=0.20 #milliseconds
     def __init__(self, address):
         self.address = address
         self.connected = False
         self.last_send_timestamp = 0
-        self.current_control_state = (0, 0)
-        self.queue_control_state = (0, 0)
+        self.current_control_state = [0, 0]
+        self.queue_control_state = [0, 0]
+        if not pygame.joystick.get_count():
+            print "No joysticks found"
+            self.joystick = None
+        else:
+            self.joystick = pygame.joystick.Joystick(0)
+            self.joystick.init()
 
         asyncore.dispatcher.__init__(self)
         self.create_socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -70,7 +76,42 @@ class Client(asyncore.dispatcher):
             print message
 
     def handle_write(self):
-        pass
+        curtime = time.time()
+        events = pygame.event.get()
+        if [ evt for evt in events \
+                 if evt.type == pygame.QUIT ]:
+            sys.exit(0)
+
+        joyaxisevents = [ evt for evt in events \
+                              if evt.type == pygame.JOYAXISMOTION ]
+        
+        for e in joyaxisevents:
+            if e.axis == 0 or e.axis == 1:
+                self.queue_control_state[e.axis] = e.value
+        
+        keyevents = [ evt for evt in events \
+                          if evt.type == pygame.KEYDOWN ]
+
+        for e in keyevents:
+            if e.key == pygame.K_UP:
+                self.queue_control_state[1] = 1.0
+            elif e.key == pygame.K_DOWN:
+                self.queue_control_state[1] = -1.0
+            elif e.key == pygame.K_LEFT:
+                self.queue_control_state[0] = -1.0
+            elif e.key == pygame.K_RIGHT:
+                self.queue_control_state[0] = 1.0
+            elif e.key == pygame.K_SPACE:
+                self.queue_control_state = [0,0]
+        
+        if curtime - self.last_send_timestamp > Client.TICK_RATE:
+            msg = ProtocolMessage(ProtocolMessage.OP_DIRECTION, \
+                                      "DIRECTION")
+            for i, v in enumerate(self.queue_control_state):
+                msg["X-%i-Axis" % i] = str(v) 
+            self.last_send_timestamp = curtime
+
+            self.sendto(str(msg), self.address)
 
     def writeable(self):
         return True
@@ -99,6 +140,8 @@ if __name__=="__main__":
     pygame.init()
     pygame.display.init()
     pygame.joystick.init()
+    pygame.display.init()
+    pygame.display.set_mode((640, 480), 16)
     address = (host, port)
     cli = Client(address)
     asyncore.loop()
