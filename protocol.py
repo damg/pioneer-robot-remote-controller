@@ -27,6 +27,7 @@ class ProtocolMessage:
     OP_NOTAUTH = 401 # Not authorized error
     OP_INCOMPAT = 417 # Incompatible version error
     OP_TIMEOUT = 408 # Authorization timeout error
+    OP_VIDEO_FRAME = 111 # A video frame
 
     PROTO_VERSION = 1.0 # Current protocol version
     MAX_PACKET_SIZE = 64*1024
@@ -42,10 +43,11 @@ class ProtocolMessage:
 
     def __str__(self):
         f_v_pairs = [ (f, self.fields[f]) for f in self.fields ]
-        f_v_pairs_str = map(lambda(x): "%s, %s" % (x[0], str(x[1])), f_v_pairs)
+        f_v_pairs_str = map(lambda(x): "%s: %s" % (x[0], str(x[1])), f_v_pairs)
         return "PIONEER/" + str(ProtocolMessage.PROTO_VERSION) + \
             " " + str(self.code) + " " + self.msgcode +"\r\n" + \
-            "\r\n".join(f_v_pairs_str)
+            "\r\n".join(f_v_pairs_str)+"\r\n" \
+            "\r\n"
 
     def __getitem__(self, k):
         if k == "code":
@@ -104,7 +106,6 @@ class ProtocolMessageParser(ProtocolMessage):
     """ Creates a ProtocolMessage from a string """
     full_regex = re.compile("^PIONEER/\d+\.\d+ \d\d\d .*\r\n" \
                                 "(.+: ?.+\r\n)*" \
-                                ".*" \
                                 "\r\n")
     def __init__(self, msg):
         if not ProtocolMessageParser.full_regex.match(msg):
