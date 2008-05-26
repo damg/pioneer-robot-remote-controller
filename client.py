@@ -39,10 +39,35 @@ class Client(asyncore.dispatcher):
                                 "HELLO",\
                                 { ProtocolMessage.FIELD_ACCEPT_VIDEO:"False" })
         self.sendto(str(handshake), self.address)
+        self.handshaking = True
+        self.connected = False
+        self.last_send_timestamp = time.time()
 
     def handle_read(self):
         message, address = self.recvfrom(ProtocolMessage.MAX_PACKET_SIZE)
-        print message
+        if address != self.address:
+            return # ignore unauthorized message
+
+        try:
+            m = ProtocolMessageParser(message)
+            if self.handshaking:
+                if m.code != ProtocolMessage.OP_OK:
+                    print "Handshake failed:", m.code, m.msgcode
+                    self.connected = False
+                    self.handshaking = False
+                    sys.exit(1)
+                self.connected = True
+                self.handshaking = False
+            elif self.connected:
+                if m.code != ProtocolMessage.OP_VIDEO_FRAME:
+                    print "Server sent an unknown message"
+                    print message
+                else:
+                    print "TODO: Receive a video frame and show it"
+                    
+        except:
+            print "Server sent an unknown message"
+            print message
 
     def handle_write(self):
         pass
