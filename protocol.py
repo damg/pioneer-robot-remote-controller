@@ -28,12 +28,13 @@ class ProtocolMessage:
     OP_INCOMPAT = 417 # Incompatible version error
     OP_TIMEOUT = 408 # Authorization timeout error
     OP_VIDEO_FRAME = 111 # A video frame
+    OP_BADDIR=410 #Bad direction data
 
     PROTO_VERSION = 1.0 # Current protocol version
     MAX_PACKET_SIZE = 64*1024
 
-    FIELD_X_AXIS = "X-X-Axis"
-    FIELD_Y_AXIS = "X-Y-Axis"
+    FIELD_X_AXIS = "X-0-Axis"
+    FIELD_Y_AXIS = "X-1-Axis"
     FIELD_ACCEPT_VIDEO = "X-Accept-Video"
     def __init__(self, code, msgcode, fields = {}, version=PROTO_VERSION):
         self.code = code

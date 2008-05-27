@@ -25,12 +25,15 @@ import base64
 from protocol import *
 
 class Server(asyncore.dispatcher):
+    MAX_MOVEMENT_SPEED = 100
+    MAX_ROTATION_SPEED = 50
     """ Accepts commands via an UDP socket """
     EXCLUSIVE_ACCESS_TIMEOUT = 30
 
     def __init__(self, port=45454):
         asyncore.dispatcher.__init__(self)
-        
+
+        # connect to the robot
         self.robot=AriaPy.ArRobot()
         self.sonar=AriaPy.ArSonarDevice()
         self.connector = AriaPy.ArSimpleConnector(sys.argv)
@@ -45,16 +48,17 @@ class Server(asyncore.dispatcher):
         self.robot.setAbsoluteMaxTransVel(400)
         self.robot.runAsync(True)
 
+        # create listening socket
         self.create_socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.bind(('', port))
 
+        # set initial fields
         self.controlling_address = None
         self.last_access_time = 0
         self.message_accu = []
         self.send_video = True
         self.direction = (0, 0)
         self.send_video = False
-        self.MOVEMENT_SPEED=50
 
     def writable(self):
         return False
@@ -112,21 +116,28 @@ class Server(asyncore.dispatcher):
                 try:
                     x = float(message[ProtocolMessage.FIELD_X_AXIS])
                 except:
-                    print "TODO: send error message", "server.py:175"
+                    self.sendto(str(\
+                        ProtocolMessage(ProtocolMessage.OP_BADDIR, \
+                                            "Bad_direction",\
+                                            { "X-Error-Message" : \
+                                                  "Bad X axis value" }), \
+                            self.controlling_address))
                     return
             if ProtocolMessage.FIELD_Y_AXIS in message.fields:
                 try:
                     y = float(message[ProtocolMessage.FIELD_Y_AXIS])
                 except:
-                    print "TODO: send error message", "server.py:180"
+                    self.sendto(str(\
+                        ProtocolMessage(ProtocolMessage.OP_BADDIR, \
+                                            "Bad_direction",\
+                                            { "X-Error-Message" : \
+                                                  "Bad Y axis value" }), \
+                            self.controlling_address))
                     return
-            self.direction = (x, y)
-            print self.direction
-
             self.last_access_time = time.time()
+            self.direction = (x, y)
             
-            pos = self.robot.getPose()
-
+            # move the robot
             self.robot.lock()
             self.robot.setRotVel(-50*x)
             self.robot.setVel(-400*y)
