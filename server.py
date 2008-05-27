@@ -107,16 +107,19 @@ class Server(asyncore.dispatcher):
                     x = float(message[ProtocolMessage.FIELD_X_AXIS])
                 except:
                     print "TODO: send error message", "server.py:175"
+                    return
             if ProtocolMessage.FIELD_Y_AXIS in message.fields:
                 try:
                     y = float(message[ProtocolMessage.FIELD_Y_AXIS])
                 except:
                     print "TODO: send error message", "server.py:180"
+                    return
             self.direction = (x, y)
             print self.direction
 
-            print "TODO: process direction data", "server.py:182"
             self.last_access_time = time.time()
+            
+            
 
     def handle_read(self):
         message, address = self.recvfrom(ProtocolMessage.MAX_PACKET_SIZE)
