@@ -113,6 +113,8 @@ class Server(asyncore.dispatcher):
                 except:
                     print "TODO: send error message", "server.py:180"
             self.direction = (x, y)
+            print self.direction
+
             print "TODO: process direction data", "server.py:182"
             self.last_access_time = time.time()
 
