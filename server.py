@@ -33,12 +33,17 @@ class Server(asyncore.dispatcher):
         
         self.robot=AriaPy.ArRobot()
         self.sonar=AriaPy.ArSonarDevice()
-        self.robot.addRangeDevice(self.sonar)
         self.connector = AriaPy.ArSimpleConnector(sys.argv)
+
         if not self.connector.connectRobot(self.robot):
             print "FATAL: Could not connect to the robot"
             print "Exiting"
             sys.exit(1)
+
+        self.robot.addRangeDevice(self.sonar)
+        self.robot.enableMotors()
+        self.robot.setAbsoluteMaxTransVel(400)
+        self.robot.runAsync(True)
 
         self.create_socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.bind(('', port))
@@ -49,6 +54,7 @@ class Server(asyncore.dispatcher):
         self.send_video = True
         self.direction = (0, 0)
         self.send_video = False
+        self.MOVEMENT_SPEED=50
 
     def writable(self):
         return False
@@ -119,7 +125,12 @@ class Server(asyncore.dispatcher):
 
             self.last_access_time = time.time()
             
-            
+            pos = self.robot.getPose()
+
+            self.robot.lock()
+            self.robot.setRotVel(-50*x)
+            self.robot.setVel(-400*y)
+            self.robot.unlock()
 
     def handle_read(self):
         message, address = self.recvfrom(ProtocolMessage.MAX_PACKET_SIZE)

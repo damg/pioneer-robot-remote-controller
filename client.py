@@ -24,7 +24,7 @@ import pygame
 import time
 
 class Client(asyncore.dispatcher):
-    TICK_RATE=0.20 #milliseconds
+    TICK_RATE=0.2 #milliseconds
     def __init__(self, address):
         self.address = address
         self.connected = False
@@ -103,13 +103,17 @@ class Client(asyncore.dispatcher):
                 self.queue_control_state[0] = 1.0
             elif e.key == pygame.K_SPACE:
                 self.queue_control_state = [0,0]
-        
+
         if curtime - self.last_send_timestamp > Client.TICK_RATE:
             msg = ProtocolMessage(ProtocolMessage.OP_DIRECTION, \
                                       "DIRECTION")
+            self.current_control_state = self.queue_control_state
+
             for i, v in enumerate(self.queue_control_state):
                 msg["X-%i-Axis" % i] = str(v) 
             self.last_send_timestamp = curtime
+            
+            print str(msg)
 
             self.sendto(str(msg), self.address)
 
