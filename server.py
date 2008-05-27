@@ -25,7 +25,7 @@ import base64
 from protocol import *
 
 class Server(asyncore.dispatcher):
-    MAX_MOVEMENT_SPEED = 100
+    MAX_MOVEMENT_SPEED = 400
     MAX_ROTATION_SPEED = 50
     """ Accepts commands via an UDP socket """
     EXCLUSIVE_ACCESS_TIMEOUT = 30
@@ -139,8 +139,8 @@ class Server(asyncore.dispatcher):
             
             # move the robot
             self.robot.lock()
-            self.robot.setRotVel(-50*x)
-            self.robot.setVel(-400*y)
+            self.robot.setRotVel(-Server.MAX_ROTATION_SPEED*x)
+            self.robot.setVel(-Server.MAX_MOVEMENT_SPEED*y)
             self.robot.unlock()
 
     def handle_read(self):
