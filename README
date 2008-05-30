@@ -4,11 +4,11 @@ protocol.py and server.py on the robot in order to make it to receive
 your messages while the client requires pygame, protocol.py and
 client.py to run.
 
-The server runs on port 45454 by default, you can change it via a
-command line option. To run the client, specify the address of robot
-on the command line. After the client started, it will instantly try
-to build up a connection and to forward the joystick/keyboard
-information.
+The server runs on port 45454 by default, there is right now no option
+to change the port except in the source code. To run the client,
+specify the address of robot on the command line. After the client
+started, it will instantly try to build up a connection and to forward
+the joystick/keyboard information.
 
 You may control the robot via joystick - the Y axis defines the
 throttle while the X axis rotation speed, you can also use keyboard
