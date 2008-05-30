@@ -1,0 +1,17 @@
+  This software provides remote control of the Pioneer robot over a
+network using the UDP protocol. You have to install the ARIA library,
+protocol.py and server.py on the robot in order to make it to receive
+your messages while the client requires pygame, protocol.py and
+client.py to run.
+
+The server runs on port 45454 by default, you can change it via a
+command line option. To run the client, specify the address of robot
+on the command line. After the client started, it will instantly try
+to build up a connection and to forward the joystick/keyboard
+information.
+
+You may control the robot via joystick - the Y axis defines the
+throttle while the X axis rotation speed, you can also use keyboard
+controls with arrow keys and SPACEBAR to reset the control information
+to (0,0).
+
