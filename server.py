@@ -157,6 +157,13 @@ class Server(asyncore.dispatcher):
             self.handle_command(message)
 
 if __name__=="__main__":
-    svr=Server()
+    port = 45454
+    if len(sys.argv) == 2:
+        try:
+            port = int(sys.argv[1])
+        except:
+            print "Invalid port value"
+            sys.exit(1)
+    svr=Server(port)
     AriaPy.Aria.init()
     asyncore.loop()
